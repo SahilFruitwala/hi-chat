@@ -86,7 +86,6 @@ const Convo = () => {
               ))
             )}
           </ConversationContent>
-          <ConversationDownload messages={chat.messages} />
           <ConversationScrollButton />
         </Conversation>
 
