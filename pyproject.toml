@@ -81,3 +81,6 @@ exclude_lines = [
     "raise AssertionError",
     "raise NotImplementedError",
 ]
+
+[tool.ruff]
+extend-exclude = ["migrations"]

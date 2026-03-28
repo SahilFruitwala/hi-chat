@@ -1,6 +1,6 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
+from sqlalchemy import engine_from_config  # noqa: F401
 from sqlalchemy import pool
 
 from alembic import context
@@ -14,8 +14,8 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from app.database import Base, DATABASE_URL
-from app.models import User, Chat, Message # Ensure models are loaded
+from app.database import Base, DATABASE_URL  # noqa: E402
+from app.models import User, Chat, Message  # noqa: F401, E402
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -59,6 +59,7 @@ def run_migrations_online() -> None:
 
     """
     from sqlalchemy import create_engine
+
     connectable = create_engine(DATABASE_URL, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
