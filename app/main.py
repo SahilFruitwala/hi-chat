@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app import crud, models, schemas
-from app.database import SessionLocal, engine, get_db
+from app.database import engine, get_db
 
 models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -23,6 +23,7 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     if db_user is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return db_user
+
 
 @app.get("/users/", response_model=list[schemas.User])
 def read_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
