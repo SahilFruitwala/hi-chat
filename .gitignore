@@ -14,3 +14,7 @@ wheels/
 
 .ropeproject
 .ruff_cache
+
+.coverage
+
+.pytest_cache
