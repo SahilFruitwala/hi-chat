@@ -37,7 +37,7 @@ def create_chat(chat: ChatCreate, user_id: int, db: Session = Depends(get_db)):
 def read_chat(chat_id: int, user_id: int, db: Session = Depends(get_db)):
     db_chat = crud.get_chat(db=db, chat_id=chat_id, user_id=user_id)
     if db_chat is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Chat not found for this user")
     return db_chat
 
 

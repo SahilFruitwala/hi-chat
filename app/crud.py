@@ -23,7 +23,7 @@ def create_user(db: Session, user: schemas.UserCreate) -> models.User:
 def get_chat(db: Session, user_id: int, chat_id: int) -> models.Chat:
     return (
         db.query(models.Chat)
-        .filter(models.User.id == user_id, models.Chat.id == chat_id)
+        .filter(models.Chat.user_id == user_id, models.Chat.id == chat_id)
         .first()
     )
 
@@ -33,7 +33,7 @@ def get_chats(
 ) -> List[models.Chat]:
     return (
         db.query(models.Chat)
-        .filter(models.User.id == user_id)
+        .filter(models.Chat.user_id == user_id)
         .order_by(desc(models.Chat.created_at))
         .offset(skip)
         .limit(limit)
