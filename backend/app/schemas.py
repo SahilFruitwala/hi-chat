@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Literal
+from typing import List, Literal, Optional
 from pydantic import BaseModel, ConfigDict
 
 
@@ -33,7 +33,7 @@ class Chat(BaseModel):
 class MessageBase(BaseModel):
     message: str
     created_by: Literal["user", "bot"]
-    model: str
+    model: Optional[str] = None
 
 
 class MessageCreate(MessageBase):

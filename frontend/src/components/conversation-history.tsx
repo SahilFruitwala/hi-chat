@@ -62,8 +62,8 @@ const ConversationHistory = () => {
   }
 
   return (
-    <div className="relative mx-auto size-full h-screen max-w-4xl p-0">
-      <div className="flex h-full flex-col">
+    <div className="relative mx-auto size-full h-full max-w-4xl p-0 overflow-hidden">
+      <div className="flex h-full flex-col overflow-hidden">
         <Conversation>
           <ConversationContent>
             {chat.messages.length === 0 ? (

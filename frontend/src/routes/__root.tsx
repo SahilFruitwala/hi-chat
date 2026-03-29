@@ -4,6 +4,12 @@ import { TanStackDevtools } from "@tanstack/react-devtools"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ModeToggle } from "@/components/mode-toggle"
 
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+
+import { Sidebar } from "@/components/ui/sidebar"
+
 import appCss from "../styles.css?url"
 
 export const Route = createRootRoute({
@@ -30,6 +36,8 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 })
 
+const queryClient = new QueryClient()
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -37,12 +45,22 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-          <div className="fixed top-4 right-4 z-50">
-            <ModeToggle />
-          </div>
-          {children}
-        </ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+            <SidebarProvider>
+              <Sidebar />
+              <div className="flex flex-col flex-1 h-screen overflow-hidden">
+                <header className="flex items-center justify-between px-4 py-3 border-b">
+                  <SidebarTrigger />
+                  <ModeToggle />
+                </header>
+                <main className="flex flex-1 overflow-hidden w-full">
+                  {children}
+                </main>
+              </div>
+            </SidebarProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
         <TanStackDevtools
           config={{
             position: "bottom-right",

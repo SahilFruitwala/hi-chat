@@ -49,6 +49,6 @@ def read_chats(user_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/chats/{chat_id}/messages", response_model=Message, tags=["chats"])
-async def create_message(message: MessageCreate, chat_id: int, db: Session = Depends(get_db)):
-    await asyncio.sleep(1)
+def create_message(message: MessageCreate, chat_id: int, db: Session = Depends(get_db)):
+    # await asyncio.sleep(1)
     return crud.create_message(db=db, message=message, chat_id=chat_id)

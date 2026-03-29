@@ -33,6 +33,7 @@ class Chat(Base):
         back_populates="chat",
         cascade="all, delete-orphan",
         foreign_keys="[Message.chat_id]",
+        order_by="Message.created_at",  # Add this line
     )
 
     # first_message_id: Mapped[Optional[int]] = mapped_column(ForeignKey("message.id", use_alter=True), nullable=True)
@@ -40,11 +41,6 @@ class Chat(Base):
 
     # first_message: Mapped[Optional["Message"]] = relationship(foreign_keys=[first_message_id])
     # last_message: Mapped[Optional["Message"]] = relationship(foreign_keys=[last_message_id])
-
-
-class MessageUser(enum.Enum):
-    USER = "user"
-    BOT = "bot"
 
 
 class Message(Base):
