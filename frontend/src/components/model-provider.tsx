@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react"
+import React, { createContext, useContext, useEffect, useState } from "react"
 import models from "@/lib/models"
 
 interface ModelContextType {
@@ -11,15 +11,16 @@ const ModelContext = createContext<ModelContextType | undefined>(undefined)
 const STORAGE_KEY = "hi-chat-selected-model"
 
 export function ModelProvider({ children }: { children: React.ReactNode }) {
-  const [model, setModel] = useState<string>(() => {
+  const [model, setModel] = useState<string>(models[0].id)
+
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved && models.some((m) => m.id === saved)) {
-        return saved
+        setModel(saved)
       }
     }
-    return models[0].id
-  })
+  }, [])
 
   const updateModel = (newModel: string) => {
     setModel(newModel)

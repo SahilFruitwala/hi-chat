@@ -43,8 +43,7 @@ def create_chat(chat: ChatCreate, user_id: int, db: Session = Depends(get_db)):
 
 @router.delete("/users/{user_id}/chats/{chat_id}", tags=["users"])
 def delete_chat(chat_id: int, user_id: int, db: Session = Depends(get_db)):
-    pass
-    # crud.delete_chat(db=db, chat_id=chat_id, user_id=user_id)
+    crud.delete_chat(db=db, chat_id=chat_id, user_id=user_id)
 
 
 @router.get("/users/{user_id}/chats/{chat_id}", response_model=Chat, tags=["users"])
