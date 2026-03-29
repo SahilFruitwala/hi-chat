@@ -21,13 +21,18 @@ class ChatCreate(BaseModel):
     model: str
 
 
-class Chat(BaseModel):
+class ChatCore(BaseModel):
     id: int
     user_id: int
     created_at: datetime
-    messages: List["Message"]
+    updated_at: datetime
+    title: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class Chat(ChatCore):
+    messages: List["Message"]
 
 
 class MessageBase(BaseModel):

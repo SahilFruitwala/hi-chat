@@ -28,12 +28,13 @@ class Chat(Base):
     user: Mapped["User"] = relationship(back_populates="chats")
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 
     messages: Mapped[List["Message"]] = relationship(
         back_populates="chat",
         cascade="all, delete-orphan",
         foreign_keys="[Message.chat_id]",
-        order_by="Message.created_at",  # Add this line
+        order_by="Message.created_at",
     )
 
     # first_message_id: Mapped[Optional[int]] = mapped_column(ForeignKey("message.id", use_alter=True), nullable=True)

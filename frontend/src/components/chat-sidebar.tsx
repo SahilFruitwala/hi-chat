@@ -14,24 +14,43 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
-
-const DUMMY_CHATS = [
-  { id: 1, title: "How does React work?", updatedAt: "Today" },
-  { id: 2, title: "Fix my Python script", updatedAt: "Today" },
-  { id: 3, title: "Explain async/await", updatedAt: "Yesterday" },
-  { id: 4, title: "Best practices for REST APIs", updatedAt: "Yesterday" },
-  { id: 5, title: "TypeScript generics deep dive", updatedAt: "Mar 27" },
-  { id: 6, title: "CSS Grid vs Flexbox", updatedAt: "Mar 26" },
-  { id: 7, title: "Setting up Postgres locally", updatedAt: "Mar 25" },
-]
-
-const TODAY = DUMMY_CHATS.filter((c) => c.updatedAt === "Today")
-const YESTERDAY = DUMMY_CHATS.filter((c) => c.updatedAt === "Yesterday")
-const OLDER = DUMMY_CHATS.filter(
-  (c) => c.updatedAt !== "Today" && c.updatedAt !== "Yesterday"
-)
+import { useQuery } from "@tanstack/react-query"
 
 export function ChatSidebar() {
+  const { data: chats } = useQuery({
+    queryKey: ["chats"],
+    queryFn: () =>
+      fetch("http://localhost:8000/users/1/chats").then((r) => r.json()),
+  })
+
+  if (!chats) {
+    return <div>Loading...</div>
+  }
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+
+  const TODAY = chats.filter((c: any) => {
+    const date = new Date(c.updated_at || c.updatedAt)
+    date.setHours(0, 0, 0, 0)
+    return date.getTime() === today.getTime()
+  })
+
+  const YESTERDAY = chats.filter((c: any) => {
+    const date = new Date(c.updated_at || c.updatedAt)
+    date.setHours(0, 0, 0, 0)
+    return date.getTime() === yesterday.getTime()
+  })
+
+  const OLDER = chats.filter((c: any) => {
+    const date = new Date(c.updated_at || c.updatedAt)
+    date.setHours(0, 0, 0, 0)
+    return date.getTime() < yesterday.getTime()
+  })
+
   return (
     <Sidebar collapsible="offcanvas">
       <SidebarHeader className="p-3">

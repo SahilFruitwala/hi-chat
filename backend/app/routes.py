@@ -3,7 +3,7 @@ import asyncio
 from fastapi import Depends, HTTPException
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
-from app.schemas import User, UserCreate, Chat, ChatCreate, Message, MessageCreate
+from app.schemas import User, UserCreate, Chat, ChatCreate, Message, MessageCreate, ChatCore
 from app import crud
 from app.database import get_db
 
@@ -42,7 +42,7 @@ def read_chat(chat_id: int, user_id: int, db: Session = Depends(get_db)):
     return db_chat
 
 
-@router.get("/users/{user_id}/chats", response_model=List[Chat], tags=["users"])
+@router.get("/users/{user_id}/chats", response_model=List[ChatCore], tags=["users"])
 def read_chats(user_id: int, db: Session = Depends(get_db)):
     db_chats = crud.get_chats(db=db, user_id=user_id)
     return db_chats
