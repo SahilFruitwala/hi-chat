@@ -57,7 +57,7 @@ def test_create_chat(client, db):
 
     response = client.post(
         f"/users/{user_id}/chats",
-        json={"message": "Hello"},
+        json={"message": "Hello", "model": "test-model"},
     )
     assert response.status_code == 200
     data = response.json()
@@ -70,8 +70,10 @@ def test_create_chat(client, db):
     assert db_chat.title == "Hello"
     assert db_chat.messages[0].message == "Hello"
     assert db_chat.messages[0].created_by == "user"
+    assert db_chat.messages[0].model == "test-model"
     assert db_chat.messages[1].message == "Echo: Hello"
     assert db_chat.messages[1].created_by == "bot"
+    assert db_chat.messages[1].model == "test-model"
 
 
 def test_read_chat(client, db):
@@ -83,7 +85,7 @@ def test_read_chat(client, db):
 
     response = client.post(
         f"/users/{user_id}/chats",
-        json={"message": "Hello"},
+        json={"message": "Hello", "model": "test-model"},
     )
     chat_id = response.json()["id"]
 
@@ -94,8 +96,10 @@ def test_read_chat(client, db):
     assert data["user_id"] == user_id
     assert data["messages"][0]["message"] == "Hello"
     assert data["messages"][0]["created_by"] == "user"
+    assert data["messages"][0]["model"] == "test-model"
     assert data["messages"][1]["message"] == "Echo: Hello"
     assert data["messages"][1]["created_by"] == "bot"
+    assert data["messages"][1]["model"] == "test-model"
 
 
 def test_read_chat_not_found(client):
@@ -117,11 +121,11 @@ def test_read_chats(client):
 
     client.post(
         f"/users/{user_id}/chats",
-        json={"message": "Hello1"},
+        json={"message": "Hello1", "model": "test-model"},
     )
     client.post(
         f"/users/{user_id}/chats",
-        json={"message": "Hello2"},
+        json={"message": "Hello2", "model": "test-model"},
     )
 
     response = client.get(f"/users/{user_id}/chats")
@@ -155,19 +159,20 @@ def test_create_message(client, db):
 
     response = client.post(
         f"/users/{user_id}/chats",
-        json={"message": "Hello"},
+        json={"message": "Hello", "model": "test-model"},
     )
     chat_id = response.json()["id"]
 
     response = client.post(
         f"/chats/{chat_id}/messages",
-        json={"message": "Hello Again", "created_by": "user"},
+        json={"message": "Hello Again", "created_by": "user", "model": "test-model"},
     )
     assert response.status_code == 200
     data = response.json()
     assert data["message"] == "Echo: Hello Again"
     assert data["created_by"] == "bot"
     assert data["chat_id"] == chat_id
+    assert data["model"] == "test-model"
     assert "id" in data
 
     db_message = (
@@ -176,4 +181,5 @@ def test_create_message(client, db):
     assert db_message is not None
     assert db_message.message == "Echo: Hello Again"
     assert db_message.created_by == "bot"
+    assert db_message.model == "test-model"
     assert db_message.chat_id == chat_id

@@ -27,3 +27,7 @@ frontend:
 dev:
 	@echo "Starting both services in parallel..."
 	@$(MAKE) -j 2 backend frontend
+
+test:
+	@echo "Running backend tests..."
+	cd backend && uv run pytest

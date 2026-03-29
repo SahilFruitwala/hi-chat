@@ -52,7 +52,7 @@ def create_chat(db: Session, chat: schemas.ChatCreate, user_id: int) -> models.C
     db.refresh(db_chat)
 
     db_message = models.Message(
-        message=chat.message, chat_id=db_chat.id, created_by="user"
+        message=chat.message, chat_id=db_chat.id, created_by="user", model=chat.model
     )
     db.add(db_message)
     db.commit()
@@ -61,6 +61,7 @@ def create_chat(db: Session, chat: schemas.ChatCreate, user_id: int) -> models.C
         message=mock_bot_response(chat.message),
         chat_id=db_chat.id,
         created_by="bot",
+        model=chat.model,
     )
     db.add(db_message_bot)
     db.commit()
@@ -74,6 +75,7 @@ def create_message(
         message=message.message,
         chat_id=chat_id,
         created_by=message.created_by,
+        model=message.model,
     )
     db.add(db_message)
     db.commit()
@@ -82,6 +84,7 @@ def create_message(
         message=mock_bot_response(message.message),
         chat_id=chat_id,
         created_by="bot",
+        model=message.model,
     )
     db.add(db_message_bot)
     db.commit()

@@ -18,6 +18,7 @@ class User(UserBase):
 
 class ChatCreate(BaseModel):
     message: str
+    model: str
 
 
 class Chat(BaseModel):
@@ -32,10 +33,11 @@ class Chat(BaseModel):
 class MessageBase(BaseModel):
     message: str
     created_by: Literal["user", "bot"]
+    model: str
 
 
 class MessageCreate(MessageBase):
-    model: str
+    pass
 
 
 class Message(MessageBase):
