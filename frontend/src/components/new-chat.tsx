@@ -5,20 +5,9 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card"
-import {
-  Sparkles,
-  Code2,
-  PenTool,
-  Globe,
-  Zap,
-} from "lucide-react"
-
-import { useModel } from "./model-provider"
+import { Sparkles, Code2, PenTool, Globe, Zap } from "lucide-react"
 
 export function NewChat() {
-  const { model, setModel } = useModel()
-  const handleSubmit = () => {}
-
   const examples = [
     {
       title: "Write & Summarize",
@@ -80,11 +69,7 @@ export function NewChat() {
       </div>
 
       <div className="mx-auto w-full max-w-3xl p-4 md:p-8">
-        <PromptInputBox
-          model={model}
-          setModel={setModel}
-          onSubmit={handleSubmit}
-        />
+        <PromptInputBox chatId={null} />
         <p className="mt-4 text-center text-xs text-muted-foreground">
           AI can make mistakes. Check important info.
         </p>

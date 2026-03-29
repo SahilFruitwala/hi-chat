@@ -4,7 +4,6 @@ from typing import List
 from sqlalchemy import ForeignKey, String, Text, func
 from app.database import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-import enum
 
 
 class User(Base):
@@ -28,7 +27,9 @@ class Chat(Base):
     user: Mapped["User"] = relationship(back_populates="chats")
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        server_default=func.now(), onupdate=func.now()
+    )
 
     messages: Mapped[List["Message"]] = relationship(
         back_populates="chat",

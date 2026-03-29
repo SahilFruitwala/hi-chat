@@ -9,17 +9,11 @@ import {
   MessageContent,
   MessageResponse,
 } from "@/components/ai-elements/message"
-import { type PromptInputMessage } from "@/components/ai-elements/prompt-input"
 import { MessageSquare } from "lucide-react"
-import { useModel } from "./model-provider"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import PromptInputBox from "./prompt-input-box"
 
 const ConversationHistory = ({ chatId }: { chatId: string }) => {
-  const { model, setModel } = useModel()
-
-  const queryClient = useQueryClient()
-
   const { data: chat } = useQuery({
     queryKey: ["messages", chatId],
     queryFn: () =>
@@ -27,32 +21,6 @@ const ConversationHistory = ({ chatId }: { chatId: string }) => {
         res.json()
       ),
   })
-
-  const mutation = useMutation({
-    mutationFn: (message: string) => {
-      return fetch(`http://localhost:8000/chats/${chatId}/messages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message,
-          created_by: "user",
-          model,
-        }),
-      })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["messages", chatId] })
-      queryClient.invalidateQueries({ queryKey: ["chats"] })
-    },
-  })
-
-  const handleSubmit = (message: PromptInputMessage) => {
-    if (message.text.trim()) {
-      mutation.mutate(message.text)
-    }
-  }
 
   if (!chat?.messages?.length) {
     return <div>No messages</div>
@@ -83,11 +51,7 @@ const ConversationHistory = ({ chatId }: { chatId: string }) => {
         </Conversation>
 
         <div className="mx-auto w-full max-w-3xl p-4 md:p-8">
-          <PromptInputBox
-            model={model}
-            setModel={setModel}
-            onSubmit={handleSubmit}
-          />
+          <PromptInputBox chatId={chatId} />
           <p className="mt-4 text-center text-xs text-muted-foreground">
             AI can make mistakes. Check important info.
           </p>

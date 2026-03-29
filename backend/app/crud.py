@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from typing import List
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
@@ -27,6 +28,19 @@ def get_chat(db: Session, user_id: int, chat_id: int) -> models.Chat:
         .filter(models.Chat.user_id == user_id, models.Chat.id == chat_id)
         .first()
     )
+
+
+def delete_chat(db: Session, user_id: int, chat_id: int) -> None:
+    chat = (
+        db.query(models.Chat)
+        .filter(models.Chat.user_id == user_id, models.Chat.id == chat_id)
+        .first()
+    )
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found for this user")
+
+    db.delete(chat)
+    db.commit()
 
 
 def get_chats(

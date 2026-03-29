@@ -1,9 +1,3 @@
-// import {
-//   Attachment,
-//   AttachmentPreview,
-//   AttachmentRemove,
-//   Attachments,
-// } from "@/components/ai-elements/attachments"
 import {
   ModelSelector,
   ModelSelectorContent,
@@ -20,11 +14,6 @@ import {
 import type { PromptInputMessage } from "@/components/ai-elements/prompt-input"
 import {
   PromptInput,
-  // PromptInputActionAddAttachments,
-  // PromptInputActionAddScreenshot,
-  // PromptInputActionMenu,
-  // PromptInputActionMenuContent,
-  // PromptInputActionMenuTrigger,
   PromptInputBody,
   PromptInputButton,
   PromptInputFooter,
@@ -32,40 +21,17 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
-  usePromptInputAttachments,
 } from "@/components/ai-elements/prompt-input"
 import { CheckIcon, GlobeIcon } from "lucide-react"
 import { memo, useCallback, useState } from "react"
 import models from "@/lib/models"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
+
+import { useModel } from "./model-provider"
 
 const SUBMITTING_TIMEOUT = 200
 const STREAMING_TIMEOUT = 2000
-
-// interface AttachmentItemProps {
-//   attachment: {
-//     id: string
-//     type: "file"
-//     filename?: string
-//     mediaType?: string
-//     url: string
-//   }
-//   onRemove: (id: string) => void
-// }
-
-// const AttachmentItem = memo(({ attachment, onRemove }: AttachmentItemProps) => {
-//   const handleRemove = useCallback(
-//     () => onRemove(attachment.id),
-//     [onRemove, attachment.id]
-//   )
-//   return (
-//     <Attachment data={attachment} key={attachment.id} onRemove={handleRemove}>
-//       <AttachmentPreview />
-//       <AttachmentRemove />
-//     </Attachment>
-//   )
-// })
-
-// AttachmentItem.displayName = "AttachmentItem"
 
 interface ModelItemProps {
   m: (typeof models)[0]
@@ -95,46 +61,55 @@ const ModelItem = memo(({ m, selectedModel, onSelect }: ModelItemProps) => {
 
 ModelItem.displayName = "ModelItem"
 
-// const PromptInputAttachmentsDisplay = () => {
-//   const attachments = usePromptInputAttachments()
-
-//   const handleRemove = useCallback(
-//     (id: string) => attachments.remove(id),
-//     [attachments]
-//   )
-
-//   if (attachments.files.length === 0) {
-//     return null
-//   }
-
-//   return (
-//     <Attachments variant="inline">
-//       {attachments.files.map((attachment) => (
-//         <AttachmentItem
-//           attachment={attachment}
-//           key={attachment.id}
-//           onRemove={handleRemove}
-//         />
-//       ))}
-//     </Attachments>
-//   )
-// }
-
-const PromptInputBox = ({
-  model,
-  setModel,
-  onSubmit,
-}: {
-  model: string
-  setModel: (model: string) => void
-  onSubmit: (message: PromptInputMessage) => void
-}) => {
+const PromptInputBox = ({ chatId }: { chatId: string | null }) => {
+  const { model, setModel } = useModel()
   const [modelSelectorOpen, setModelSelectorOpen] = useState(false)
   const [status, setStatus] = useState<
     "submitted" | "streaming" | "ready" | "error"
   >("ready")
 
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
+
   const selectedModelData = models.find((m) => m.id === model)
+
+  const mutation = useMutation({
+    mutationFn: (message: string) => {
+      if (chatId) {
+        return fetch(`http://localhost:8000/chats/${chatId}/messages`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message,
+            created_by: "user",
+            model,
+          }),
+        })
+      } else {
+        return fetch(`http://localhost:8000/users/1/chats`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message,
+            model,
+          }),
+        })
+      }
+    },
+    onSuccess: async (data) => {
+      const json = await data.json()
+      queryClient.invalidateQueries({ queryKey: ["chats"] })
+      if (!chatId) {
+        navigate({ to: "/chats/$chatId", params: { chatId: json.id } })
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["messages", chatId] })
+      }
+    },
+  })
 
   const handleModelSelect = useCallback((id: string) => {
     setModel(id)
@@ -152,7 +127,9 @@ const PromptInputBox = ({
     setStatus("submitted")
 
     // eslint-disable-next-line no-console
-    onSubmit(message)
+    if (message.text.trim()) {
+      mutation.mutate(message.text)
+    }
 
     setTimeout(() => {
       setStatus("streaming")

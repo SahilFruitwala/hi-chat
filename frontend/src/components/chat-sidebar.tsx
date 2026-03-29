@@ -1,4 +1,4 @@
-import { MessageSquare, Plus, Trash2 } from "lucide-react"
+import { Plus } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -8,22 +8,44 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Link, useParams } from "@tanstack/react-router"
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router"
 import ChatItem from "./chat-item"
-import { redirect } from "@tanstack/react-router"
-
+interface Chat {
+  id: string
+  title: string
+  updated_at: string
+}
 export function ChatSidebar() {
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const state = useRouterState()
+  const activeChatId = (
+    state.matches.find((m) => m.routeId === "/chats/$chatId")?.params as any
+  )?.chatId
+
   const { data: chats } = useQuery({
     queryKey: ["chats"],
     queryFn: () =>
       fetch("http://localhost:8000/users/1/chats").then((r) => r.json()),
+  })
+
+  const mutation = useMutation({
+    mutationFn: (chatId: string) => {
+      return fetch(`http://localhost:8000/users/1/chats/${chatId}`, {
+        method: "DELETE",
+      })
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["chats"] })
+      if (activeChatId && String(activeChatId) === String(variables)) {
+        queryClient.invalidateQueries({ queryKey: ["messages", variables] })
+        navigate({ to: "/" })
+      }
+    },
   })
 
   if (!chats) {
@@ -36,13 +58,13 @@ export function ChatSidebar() {
   const yesterday = new Date(today)
   yesterday.setDate(yesterday.getDate() - 1)
 
-  const TODAY = chats.filter((c: any) => {
+  const TODAY = chats.filter((c: Chat) => {
     const date = new Date(c.updated_at)
     // date.setHours(0, 0, 0, 0)
     return date.toDateString() === today.toDateString()
   })
 
-  const YESTERDAY = chats.filter((c: any) => {
+  const YESTERDAY = chats.filter((c: Chat) => {
     const date = new Date(c.updated_at)
     return date.toDateString() === yesterday.toDateString()
   })
@@ -51,10 +73,14 @@ export function ChatSidebar() {
   yesterdayStart.setDate(yesterdayStart.getDate() - 1)
   yesterdayStart.setHours(0, 0, 0, 0)
 
-  const OLDER = chats.filter((c: any) => {
+  const OLDER = chats.filter((c: Chat) => {
     const date = new Date(c.updated_at)
     return date.getTime() < yesterdayStart.getTime()
   })
+
+  const handleDelete = (chatId: string) => {
+    mutation.mutate(chatId)
+  }
 
   return (
     <Sidebar collapsible="offcanvas">
@@ -79,8 +105,8 @@ export function ChatSidebar() {
             <SidebarGroupLabel>Today</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {TODAY.map((chat) => (
-                  <ChatItem key={chat.id} chat={chat} />
+                {TODAY.map((chat: Chat) => (
+                  <ChatItem key={chat.id} chat={chat} onDelete={handleDelete} />
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
@@ -92,8 +118,8 @@ export function ChatSidebar() {
             <SidebarGroupLabel>Yesterday</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {YESTERDAY.map((chat) => (
-                  <ChatItem key={chat.id} chat={chat} />
+                {YESTERDAY.map((chat: Chat) => (
+                  <ChatItem key={chat.id} chat={chat} onDelete={handleDelete} />
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
@@ -105,8 +131,8 @@ export function ChatSidebar() {
             <SidebarGroupLabel>Older</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {OLDER.map((chat) => (
-                  <ChatItem key={chat.id} chat={chat} />
+                {OLDER.map((chat: Chat) => (
+                  <ChatItem key={chat.id} chat={chat} onDelete={handleDelete} />
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
@@ -122,37 +148,5 @@ export function ChatSidebar() {
         </p>
       </SidebarFooter>
     </Sidebar>
-  )
-}
-
-function ChatItem({ chat }: { chat: { id: number; title: string } }) {
-  return (
-    <SidebarMenuItem>
-      <Link
-        to="/chats/$chatId"
-        params={{ chatId: chat.id.toString() }}
-        className="flex w-full items-center gap-2 py-2"
-        activeOptions={{
-          exact: true,
-        }}
-        activeProps={{
-          className: "bg-sidebar-accent text-sidebar-accent-foreground",
-        }}
-      >
-        <SidebarMenuButton className="cursor-pointer" tooltip={chat.title}>
-          <MessageSquare className="shrink-0" />
-          <span>{chat.title}</span>
-        </SidebarMenuButton>
-      </Link>
-      <SidebarMenuAction
-        showOnHover
-        className="top-1/2 flex -translate-y-1/2 items-center text-muted-foreground hover:text-destructive"
-        onClick={() => {
-          alert("Delete chat")
-        }}
-      >
-        <Trash2 className="size-3.5" />
-      </SidebarMenuAction>
-    </SidebarMenuItem>
   )
 }

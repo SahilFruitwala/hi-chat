@@ -1,9 +1,16 @@
 from typing import List
-import asyncio
 from fastapi import Depends, HTTPException
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
-from app.schemas import User, UserCreate, Chat, ChatCreate, Message, MessageCreate, ChatCore
+from app.schemas import (
+    User,
+    UserCreate,
+    Chat,
+    ChatCreate,
+    Message,
+    MessageCreate,
+    ChatCore,
+)
 from app import crud
 from app.database import get_db
 
@@ -32,6 +39,12 @@ def read_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
 @router.post("/users/{user_id}/chats", response_model=Chat, tags=["users"])
 def create_chat(chat: ChatCreate, user_id: int, db: Session = Depends(get_db)):
     return crud.create_chat(db=db, chat=chat, user_id=user_id)
+
+
+@router.delete("/users/{user_id}/chats/{chat_id}", tags=["users"])
+def delete_chat(chat_id: int, user_id: int, db: Session = Depends(get_db)):
+    pass
+    # crud.delete_chat(db=db, chat_id=chat_id, user_id=user_id)
 
 
 @router.get("/users/{user_id}/chats/{chat_id}", response_model=Chat, tags=["users"])
