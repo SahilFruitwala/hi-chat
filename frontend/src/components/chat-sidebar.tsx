@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { useQuery } from "@tanstack/react-query"
+import { Link } from "@tanstack/react-router"
 
 export function ChatSidebar() {
   const { data: chats } = useQuery({
@@ -122,8 +123,20 @@ function ChatItem({ chat }: { chat: { id: number; title: string } }) {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton className="cursor-pointer" tooltip={chat.title}>
-        <MessageSquare className="shrink-0" />
-        <span>{chat.title}</span>
+        <Link
+          to="/chats/$chatId"
+          params={{ chatId: chat.id.toString() }}
+          className="flex w-full items-center gap-2"
+          activeOptions={{
+            exact: true,
+          }}
+          activeProps={{
+            className: "bg-sidebar-accent text-sidebar-accent-foreground",
+          }}
+        >
+          <MessageSquare className="shrink-0" />
+          <span>{chat.title}</span>
+        </Link>
       </SidebarMenuButton>
       <SidebarMenuAction
         showOnHover

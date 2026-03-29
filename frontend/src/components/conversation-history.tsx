@@ -14,22 +14,22 @@ import { MessageSquare } from "lucide-react"
 import { useState } from "react"
 import models from "@/lib/models"
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import PromptInputBox from "./prompt-input-box"
 
-const ConversationHistory = () => {
+const ConversationHistory = ({ messages }: { messages: any[] }) => {
   const [model, setModel] = useState<string>(models[0].id)
 
   const queryClient = useQueryClient()
 
-  const { data: chat } = useQuery({
-    queryKey: ["messages"],
-    queryFn: () => {
-      return fetch("http://localhost:8000/users/1/chats/1").then((res) =>
-        res.json()
-      )
-    },
-  })
+  // const { data: chat } = useQuery({
+  //   queryKey: ["messages"],
+  //   queryFn: () => {
+  //     return fetch("http://localhost:8000/users/1/chats/1").then((res) =>
+  //       res.json()
+  //     )
+  //   },
+  // })
 
   const mutation = useMutation({
     mutationFn: (message: string) => {
@@ -57,23 +57,23 @@ const ConversationHistory = () => {
     }
   }
 
-  if (!chat) {
-    return <div>Loading...</div>
+  if (!messages.length) {
+    return <div>No messages</div>
   }
 
   return (
-    <div className="relative mx-auto size-full h-full max-w-4xl p-0 overflow-hidden">
+    <div className="relative mx-auto size-full h-full max-w-4xl overflow-hidden p-0">
       <div className="flex h-full flex-col overflow-hidden">
         <Conversation>
           <ConversationContent>
-            {chat.messages.length === 0 ? (
+            {messages.length === 0 ? (
               <ConversationEmptyState
                 icon={<MessageSquare className="size-12" />}
                 title="Start a conversation"
                 description="Type a message below to begin chatting"
               />
             ) : (
-              chat.messages.map((message: any) => (
+              messages.map((message: any) => (
                 <Message from={message.created_by} key={message.id}>
                   <MessageContent>
                     <MessageResponse>{message.message}</MessageResponse>
