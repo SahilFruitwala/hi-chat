@@ -57,14 +57,16 @@ export function ChatSidebar() {
   return (
     <Sidebar collapsible="offcanvas">
       <SidebarHeader className="p-3">
-        <Button
-          className="w-full justify-start gap-2 p-5 font-medium"
-          variant="default"
-          size="lg"
-        >
-          <Plus className="size-4" />
-          New Chat
-        </Button>
+        <Link to="/">
+          <Button
+            className="w-full justify-start gap-2 p-5 font-medium"
+            variant="default"
+            size="lg"
+          >
+            <Plus className="size-4" />
+            New Chat
+          </Button>
+        </Link>
       </SidebarHeader>
 
       <SidebarSeparator />
