@@ -9,19 +9,16 @@ import {
   MessageContent,
   MessageResponse,
 } from "@/components/ai-elements/message"
-import {
-  PromptInput,
-  type PromptInputMessage,
-  PromptInputTextarea,
-  PromptInputSubmit,
-} from "@/components/ai-elements/prompt-input"
+import { type PromptInputMessage } from "@/components/ai-elements/prompt-input"
 import { MessageSquare } from "lucide-react"
 import { useState } from "react"
+import models from "@/lib/models"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import PromptInputBox from "./prompt-input-box"
 
-const Convo = () => {
-  const [input, setInput] = useState("")
+const ConversationHistory = () => {
+  const [model, setModel] = useState<string>(models[0].id)
 
   const queryClient = useQueryClient()
 
@@ -44,6 +41,7 @@ const Convo = () => {
         body: JSON.stringify({
           message,
           created_by: "user",
+          model,
         }),
       })
     },
@@ -56,7 +54,6 @@ const Convo = () => {
   const handleSubmit = (message: PromptInputMessage) => {
     if (message.text.trim()) {
       mutation.mutate(message.text)
-      setInput("")
     }
   }
 
@@ -88,7 +85,13 @@ const Convo = () => {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput
+        <PromptInputBox
+          model={model}
+          setModel={setModel}
+          onSubmit={handleSubmit}
+        />
+
+        {/* <PromptInput
           onSubmit={handleSubmit}
           className="relative mx-auto mt-4 w-full max-w-2xl"
         >
@@ -103,10 +106,10 @@ const Convo = () => {
             disabled={!input.trim()}
             className="absolute right-1 bottom-1"
           />
-        </PromptInput>
+        </PromptInput> */}
       </div>
     </div>
   )
 }
 
-export default Convo
+export default ConversationHistory

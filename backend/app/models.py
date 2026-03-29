@@ -58,3 +58,5 @@ class Message(Base):
 
     created_by: Mapped[str] = mapped_column(String(10))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    model: Mapped[str] = mapped_column(String(100), nullable=True)

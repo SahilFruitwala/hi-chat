@@ -35,7 +35,7 @@ class MessageBase(BaseModel):
 
 
 class MessageCreate(MessageBase):
-    pass
+    model: str
 
 
 class Message(MessageBase):
