@@ -29,27 +29,29 @@ export function ChatSidebar() {
   }
 
   const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  // today.setHours(0, 0, 0, 0)
 
   const yesterday = new Date(today)
   yesterday.setDate(yesterday.getDate() - 1)
 
   const TODAY = chats.filter((c: any) => {
-    const date = new Date(c.updated_at || c.updatedAt)
-    date.setHours(0, 0, 0, 0)
-    return date.getTime() === today.getTime()
+    const date = new Date(c.updated_at)
+    // date.setHours(0, 0, 0, 0)
+    return date.toDateString() === today.toDateString()
   })
 
   const YESTERDAY = chats.filter((c: any) => {
-    const date = new Date(c.updated_at || c.updatedAt)
-    date.setHours(0, 0, 0, 0)
-    return date.getTime() === yesterday.getTime()
+    const date = new Date(c.updated_at)
+    return date.toDateString() === yesterday.toDateString()
   })
 
+  const yesterdayStart = new Date(today)
+  yesterdayStart.setDate(yesterdayStart.getDate() - 1)
+  yesterdayStart.setHours(0, 0, 0, 0)
+
   const OLDER = chats.filter((c: any) => {
-    const date = new Date(c.updated_at || c.updatedAt)
-    date.setHours(0, 0, 0, 0)
-    return date.getTime() < yesterday.getTime()
+    const date = new Date(c.updated_at)
+    return date.getTime() < yesterdayStart.getTime()
   })
 
   return (

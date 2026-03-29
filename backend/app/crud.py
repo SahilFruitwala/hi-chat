@@ -2,6 +2,7 @@ from typing import List
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from app import models, schemas
+from datetime import datetime
 
 
 def get_user(db: Session, user_id: int) -> models.User:
@@ -34,7 +35,7 @@ def get_chats(
     return (
         db.query(models.Chat)
         .filter(models.Chat.user_id == user_id)
-        .order_by(desc(models.Chat.created_at))
+        .order_by(desc(models.Chat.updated_at))
         .offset(skip)
         .limit(limit)
         .all()
@@ -87,6 +88,10 @@ def create_message(
         model=message.model,
     )
     db.add(db_message_bot)
+    db.commit()
+
+    db_chat = db.query(models.Chat).filter(models.Chat.id == chat_id).first()
+    db_chat.updated_at = datetime.utcnow()
     db.commit()
 
     return db_message_bot

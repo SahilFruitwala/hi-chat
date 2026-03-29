@@ -14,26 +14,26 @@ import { MessageSquare } from "lucide-react"
 import { useState } from "react"
 import models from "@/lib/models"
 
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import PromptInputBox from "./prompt-input-box"
 
-const ConversationHistory = ({ messages }: { messages: any[] }) => {
+const ConversationHistory = ({ chatId }: { chatId: string }) => {
   const [model, setModel] = useState<string>(models[0].id)
 
   const queryClient = useQueryClient()
 
-  // const { data: chat } = useQuery({
-  //   queryKey: ["messages"],
-  //   queryFn: () => {
-  //     return fetch("http://localhost:8000/users/1/chats/1").then((res) =>
-  //       res.json()
-  //     )
-  //   },
-  // })
+  const { data: chat } = useQuery({
+    queryKey: ["messages", chatId],
+    queryFn: () => {
+      return fetch(`http://localhost:8000/users/1/chats/${chatId}`).then(
+        (res) => res.json()
+      )
+    },
+  })
 
   const mutation = useMutation({
     mutationFn: (message: string) => {
-      return fetch("http://localhost:8000/chats/1/messages", {
+      return fetch(`http://localhost:8000/chats/${chatId}/messages`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,8 +46,8 @@ const ConversationHistory = ({ messages }: { messages: any[] }) => {
       })
     },
     onSuccess: () => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ["messages"] })
+      queryClient.invalidateQueries({ queryKey: ["messages", chatId] })
+      queryClient.invalidateQueries({ queryKey: ["chats"] })
     },
   })
 
@@ -57,7 +57,7 @@ const ConversationHistory = ({ messages }: { messages: any[] }) => {
     }
   }
 
-  if (!messages.length) {
+  if (!chat?.messages?.length) {
     return <div>No messages</div>
   }
 
@@ -66,14 +66,14 @@ const ConversationHistory = ({ messages }: { messages: any[] }) => {
       <div className="flex h-full flex-col overflow-hidden">
         <Conversation>
           <ConversationContent>
-            {messages.length === 0 ? (
+            {chat.messages.length === 0 ? (
               <ConversationEmptyState
                 icon={<MessageSquare className="size-12" />}
                 title="Start a conversation"
                 description="Type a message below to begin chatting"
               />
             ) : (
-              messages.map((message: any) => (
+              chat.messages.map((message: any) => (
                 <Message from={message.created_by} key={message.id}>
                   <MessageContent>
                     <MessageResponse>{message.message}</MessageResponse>
