@@ -1,17 +1,17 @@
+import { MessageSquare } from "lucide-react"
+import { useQuery } from "@tanstack/react-query"
+import PromptInputBox from "./prompt-input-box"
+import {
+  Message,
+  MessageContent,
+  MessageResponse,
+} from "@/components/ai-elements/message"
 import {
   Conversation,
   ConversationContent,
   ConversationEmptyState,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation"
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message"
-import { MessageSquare } from "lucide-react"
-import { useQuery } from "@tanstack/react-query"
-import PromptInputBox from "./prompt-input-box"
 
 const ConversationHistory = ({ chatId }: { chatId: string }) => {
   const { data: chat } = useQuery({

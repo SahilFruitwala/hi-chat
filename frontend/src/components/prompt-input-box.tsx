@@ -1,3 +1,21 @@
+import { CheckIcon, GlobeIcon } from "lucide-react"
+import { memo, useCallback, useState } from "react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
+
+import { useModel } from "./model-provider"
+import type { PromptInputMessage } from "@/components/ai-elements/prompt-input"
+import models from "@/lib/models"
+import {
+  PromptInput,
+  PromptInputBody,
+  PromptInputButton,
+  PromptInputFooter,
+  PromptInputProvider,
+  PromptInputSubmit,
+  PromptInputTextarea,
+  PromptInputTools,
+} from "@/components/ai-elements/prompt-input"
 import {
   ModelSelector,
   ModelSelectorContent,
@@ -11,24 +29,6 @@ import {
   ModelSelectorName,
   ModelSelectorTrigger,
 } from "@/components/ai-elements/model-selector"
-import type { PromptInputMessage } from "@/components/ai-elements/prompt-input"
-import {
-  PromptInput,
-  PromptInputBody,
-  PromptInputButton,
-  PromptInputFooter,
-  PromptInputProvider,
-  PromptInputSubmit,
-  PromptInputTextarea,
-  PromptInputTools,
-} from "@/components/ai-elements/prompt-input"
-import { CheckIcon, GlobeIcon } from "lucide-react"
-import { memo, useCallback, useState } from "react"
-import models from "@/lib/models"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useNavigate } from "@tanstack/react-router"
-
-import { useModel } from "./model-provider"
 
 const SUBMITTING_TIMEOUT = 200
 const STREAMING_TIMEOUT = 2000
@@ -118,7 +118,7 @@ const PromptInputBox = ({ chatId }: { chatId: string | null }) => {
 
   const handleSubmit = useCallback((message: PromptInputMessage) => {
     const hasText = Boolean(message.text)
-    const hasAttachments = Boolean(message.files?.length)
+    const hasAttachments = Boolean(message.files.length)
 
     if (!(hasText || hasAttachments)) {
       return
@@ -126,7 +126,7 @@ const PromptInputBox = ({ chatId }: { chatId: string | null }) => {
 
     setStatus("submitted")
 
-    // eslint-disable-next-line no-console
+     
     if (message.text.trim()) {
       mutation.mutate(message.text)
     }

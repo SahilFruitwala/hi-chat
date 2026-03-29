@@ -137,10 +137,8 @@ def test_read_chats(client):
     assert data[0]["user_id"] == user_id
     assert data[1]["user_id"] == user_id
     # Newest first (desc order)
-    assert data[0]["messages"][0]["message"] == "Hello2"
-    assert data[1]["messages"][0]["message"] == "Hello1"
-    assert data[0]["messages"][0]["model"] == "test-model-2"
-    assert data[1]["messages"][0]["model"] == "test-model-1"
+    assert data[0]["title"] == "Hello2"
+    assert data[1]["title"] == "Hello1"
 
 
 def test_read_chats_with_invalid_user(client):

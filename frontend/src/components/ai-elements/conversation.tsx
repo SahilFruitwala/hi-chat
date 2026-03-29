@@ -1,12 +1,12 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import type { UIMessage } from "ai"
 import { ArrowDownIcon } from "lucide-react"
-import type { ComponentProps } from "react"
 import { useCallback } from "react"
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom"
+import type { ComponentProps } from "react"
+import type { UIMessage } from "ai"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 export type ConversationProps = ComponentProps<typeof StickToBottom>
 
@@ -112,7 +112,7 @@ const defaultFormatMessage = (message: UIMessage): string => {
 }
 
 export const messagesToMarkdown = (
-  messages: UIMessage[],
+  messages: Array<UIMessage>,
   formatMessage: (
     message: UIMessage,
     index: number

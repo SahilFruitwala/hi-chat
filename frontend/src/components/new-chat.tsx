@@ -1,11 +1,11 @@
+import { Code2, Globe, PenTool, Sparkles, Zap } from "lucide-react"
 import PromptInputBox from "./prompt-input-box"
 import {
   Card,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card"
-import { Sparkles, Code2, PenTool, Globe, Zap } from "lucide-react"
 
 export function NewChat() {
   const examples = [

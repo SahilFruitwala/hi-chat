@@ -1,4 +1,8 @@
 import { Plus } from "lucide-react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router"
+import ChatItem from "./chat-item"
+import { Button } from "@/components/ui/button"
 import {
   Sidebar,
   SidebarContent,
@@ -10,10 +14,7 @@ import {
   SidebarMenu,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router"
-import ChatItem from "./chat-item"
+
 interface Chat {
   id: string
   title: string

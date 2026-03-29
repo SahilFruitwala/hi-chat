@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from app import models, schemas
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def get_user(db: Session, user_id: int) -> models.User:
@@ -105,7 +105,7 @@ def create_message(
     db.commit()
 
     db_chat = db.query(models.Chat).filter(models.Chat.id == chat_id).first()
-    db_chat.updated_at = datetime.utcnow()
+    db_chat.updated_at = datetime.now(timezone.utc)
     db.commit()
 
     return db_message_bot

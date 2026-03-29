@@ -1,10 +1,10 @@
 import { MessageSquare, Trash2 } from "lucide-react"
+import { Link } from "@tanstack/react-router"
 import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Link } from "@tanstack/react-router"
 
 export default function ChatItem({
   chat,

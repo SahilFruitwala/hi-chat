@@ -1,5 +1,5 @@
-import ConversationHistory from "@/components/conversation-history"
 import { createFileRoute } from "@tanstack/react-router"
+import ConversationHistory from "@/components/conversation-history"
 
 export const Route = createFileRoute("/chats/$chatId")({
   // In a loader
