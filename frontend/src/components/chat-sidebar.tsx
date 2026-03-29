@@ -14,8 +14,10 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
-import { useQuery } from "@tanstack/react-query"
-import { Link } from "@tanstack/react-router"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Link, useParams } from "@tanstack/react-router"
+import ChatItem from "./chat-item"
+import { redirect } from "@tanstack/react-router"
 
 export function ChatSidebar() {
   const { data: chats } = useQuery({
