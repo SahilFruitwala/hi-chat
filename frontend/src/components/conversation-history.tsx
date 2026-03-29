@@ -11,24 +11,21 @@ import {
 } from "@/components/ai-elements/message"
 import { type PromptInputMessage } from "@/components/ai-elements/prompt-input"
 import { MessageSquare } from "lucide-react"
-import { useState } from "react"
-import models from "@/lib/models"
-
+import { useModel } from "./model-provider"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import PromptInputBox from "./prompt-input-box"
 
 const ConversationHistory = ({ chatId }: { chatId: string }) => {
-  const [model, setModel] = useState<string>(models[0].id)
+  const { model, setModel } = useModel()
 
   const queryClient = useQueryClient()
 
   const { data: chat } = useQuery({
     queryKey: ["messages", chatId],
-    queryFn: () => {
-      return fetch(`http://localhost:8000/users/1/chats/${chatId}`).then(
-        (res) => res.json()
-      )
-    },
+    queryFn: () =>
+      fetch(`http://localhost:8000/users/1/chats/${chatId}`).then((res) =>
+        res.json()
+      ),
   })
 
   const mutation = useMutation({
@@ -85,28 +82,16 @@ const ConversationHistory = ({ chatId }: { chatId: string }) => {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInputBox
-          model={model}
-          setModel={setModel}
-          onSubmit={handleSubmit}
-        />
-
-        {/* <PromptInput
-          onSubmit={handleSubmit}
-          className="relative mx-auto mt-4 w-full max-w-2xl"
-        >
-          <PromptInputTextarea
-            value={input}
-            placeholder="Say something..."
-            onChange={(e) => setInput(e.currentTarget.value)}
-            className="pr-12"
+        <div className="mx-auto w-full max-w-3xl p-4 md:p-8">
+          <PromptInputBox
+            model={model}
+            setModel={setModel}
+            onSubmit={handleSubmit}
           />
-          <PromptInputSubmit
-            status={status === "streaming" ? "streaming" : "ready"}
-            disabled={!input.trim()}
-            className="absolute right-1 bottom-1"
-          />
-        </PromptInput> */}
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            AI can make mistakes. Check important info.
+          </p>
+        </div>
       </div>
     </div>
   )

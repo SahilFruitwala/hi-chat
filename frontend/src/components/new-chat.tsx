@@ -1,6 +1,4 @@
-import { useState } from "react"
 import PromptInputBox from "./prompt-input-box"
-import models from "@/lib/models"
 import {
   Card,
   CardHeader,
@@ -15,8 +13,10 @@ import {
   Zap,
 } from "lucide-react"
 
+import { useModel } from "./model-provider"
+
 export function NewChat() {
-  const [model, setModel] = useState<string>(models[0].id)
+  const { model, setModel } = useModel()
   const handleSubmit = () => {}
 
   const examples = [
