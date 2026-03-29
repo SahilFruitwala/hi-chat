@@ -5,10 +5,9 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { ModeToggle } from "@/components/mode-toggle"
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-
+import { ChatSidebar } from "@/components/chat-sidebar"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-
-import { Sidebar } from "@/components/ui/sidebar"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 import appCss from "../styles.css?url"
 
@@ -46,9 +45,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
           <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
             <SidebarProvider>
-              <Sidebar />
+              <ChatSidebar />
               <div className="flex flex-col flex-1 h-screen overflow-hidden">
                 <header className="flex items-center justify-between px-4 py-3 border-b">
                   <SidebarTrigger />
@@ -60,6 +60,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               </div>
             </SidebarProvider>
           </ThemeProvider>
+          </TooltipProvider>
         </QueryClientProvider>
         <TanStackDevtools
           config={{
