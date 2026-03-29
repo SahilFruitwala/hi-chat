@@ -1,4 +1,5 @@
 from app import models
+import time
 
 
 def test_create_user(client):
@@ -121,11 +122,12 @@ def test_read_chats(client):
 
     client.post(
         f"/users/{user_id}/chats",
-        json={"message": "Hello1", "model": "test-model"},
+        json={"message": "Hello1", "model": "test-model-1"},
     )
+    time.sleep(1.1)  # Ensure different created_at
     client.post(
         f"/users/{user_id}/chats",
-        json={"message": "Hello2", "model": "test-model"},
+        json={"message": "Hello2", "model": "test-model-2"},
     )
 
     response = client.get(f"/users/{user_id}/chats")
@@ -134,17 +136,17 @@ def test_read_chats(client):
     assert len(data) == 2
     assert data[0]["user_id"] == user_id
     assert data[1]["user_id"] == user_id
-    assert data[0]["messages"][0]["message"] == "Hello1"
-    assert data[1]["messages"][0]["message"] == "Hello2"
+    # Newest first (desc order)
+    assert data[0]["messages"][0]["message"] == "Hello2"
+    assert data[1]["messages"][0]["message"] == "Hello1"
+    assert data[0]["messages"][0]["model"] == "test-model-2"
+    assert data[1]["messages"][0]["model"] == "test-model-1"
 
 
 def test_read_chats_with_invalid_user(client):
-    user_response = client.post(
-        "/users/",
-        json={"name": "Chat User"},
-    )
-    user_id = user_response.json()["id"]
-    response = client.get(f"/users/{user_id}/chats")
+    # Use a non-existent user ID
+    invalid_user_id = 9999
+    response = client.get(f"/users/{invalid_user_id}/chats")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 0

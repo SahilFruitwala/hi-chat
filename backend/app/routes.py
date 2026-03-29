@@ -1,4 +1,5 @@
 from typing import List
+import asyncio
 from fastapi import Depends, HTTPException
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
@@ -46,7 +47,6 @@ def read_chats(user_id: int, db: Session = Depends(get_db)):
     db_chats = crud.get_chats(db=db, user_id=user_id)
     return db_chats
 
-import asyncio
 
 @router.post("/chats/{chat_id}/messages", response_model=Message, tags=["chats"])
 async def create_message(message: MessageCreate, chat_id: int, db: Session = Depends(get_db)):
