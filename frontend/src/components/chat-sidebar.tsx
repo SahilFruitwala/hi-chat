@@ -53,32 +53,6 @@ export function ChatSidebar() {
     return <div>Loading...</div>
   }
 
-  const today = new Date()
-  // today.setHours(0, 0, 0, 0)
-
-  const yesterday = new Date(today)
-  yesterday.setDate(yesterday.getDate() - 1)
-
-  const TODAY = chats.filter((c: Chat) => {
-    const date = new Date(c.updated_at)
-    // date.setHours(0, 0, 0, 0)
-    return date.toDateString() === today.toDateString()
-  })
-
-  const YESTERDAY = chats.filter((c: Chat) => {
-    const date = new Date(c.updated_at)
-    return date.toDateString() === yesterday.toDateString()
-  })
-
-  const yesterdayStart = new Date(today)
-  yesterdayStart.setDate(yesterdayStart.getDate() - 1)
-  yesterdayStart.setHours(0, 0, 0, 0)
-
-  const OLDER = chats.filter((c: Chat) => {
-    const date = new Date(c.updated_at)
-    return date.getTime() < yesterdayStart.getTime()
-  })
-
   const handleDelete = (chatId: string) => {
     mutation.mutate(chatId)
   }
@@ -101,38 +75,12 @@ export function ChatSidebar() {
       <SidebarSeparator />
 
       <SidebarContent>
-        {TODAY.length > 0 && (
+        {chats.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel>Today</SidebarGroupLabel>
+            {/*<SidebarGroupLabel>Today</SidebarGroupLabel>*/}
             <SidebarGroupContent>
               <SidebarMenu>
-                {TODAY.map((chat: Chat) => (
-                  <ChatItem key={chat.id} chat={chat} onDelete={handleDelete} />
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        {YESTERDAY.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Yesterday</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {YESTERDAY.map((chat: Chat) => (
-                  <ChatItem key={chat.id} chat={chat} onDelete={handleDelete} />
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        {OLDER.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Older</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {OLDER.map((chat: Chat) => (
+                {chats.map((chat: Chat) => (
                   <ChatItem key={chat.id} chat={chat} onDelete={handleDelete} />
                 ))}
               </SidebarMenu>
