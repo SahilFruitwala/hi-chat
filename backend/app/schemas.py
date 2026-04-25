@@ -19,6 +19,7 @@ class User(UserBase):
 class ChatCreate(BaseModel):
     message: str
     model: str
+    model_provider: str
 
 
 class ChatCore(BaseModel):
@@ -38,16 +39,17 @@ class Chat(ChatCore):
 class MessageBase(BaseModel):
     message: str
     created_by: Literal["user", "bot"]
-    model: Optional[str] = None
 
 
 class MessageCreate(MessageBase):
-    pass
+    model: str
+    model_provider: str
 
 
 class Message(MessageBase):
     id: int
     chat_id: int
     created_at: datetime
+    model: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)

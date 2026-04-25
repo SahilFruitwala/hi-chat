@@ -58,8 +58,13 @@ def get_chats(
     )
 
 
-def mock_bot_response(message: str, message_history: Optional[List[Union[ModelRequest, ModelResponse]]] = None) -> str:
-    agent = AgentCore().get_google_agent()
+def mock_bot_response(
+    message: str,
+    model: str,
+    model_provider: str,
+    message_history: Optional[List[Union[ModelRequest, ModelResponse]]] = None,
+) -> str:
+    agent = AgentCore.get_agent(model, model_provider)
     if message_history:
         return agent.run_sync(message, message_history=message_history).output
     return agent.run_sync(message).output
@@ -78,7 +83,7 @@ def create_chat(db: Session, chat: schemas.ChatCreate, user_id: int) -> models.C
     db.commit()
 
     db_message_bot = models.Message(
-        message=mock_bot_response(chat.message),
+        message=mock_bot_response(chat.message, chat.model, chat.model_provider),
         chat_id=db_chat.id,
         created_by="bot",
         model=chat.model,
@@ -91,12 +96,10 @@ def create_chat(db: Session, chat: schemas.ChatCreate, user_id: int) -> models.C
 def create_message(
     db: Session, message: schemas.MessageCreate, chat_id: int
 ) -> models.Message:
-    messages = (
-        db.execute(
-            select(models.Message.message, models.Message.created_by)
-            .where(models.Message.chat_id == chat_id)
-            .order_by(models.Message.created_at)
-        )
+    messages = db.execute(
+        select(models.Message.message, models.Message.created_by)
+        .where(models.Message.chat_id == chat_id)
+        .order_by(models.Message.created_at)
     )
 
     message_history = []
@@ -106,15 +109,8 @@ def create_message(
                 ModelRequest(parts=[UserPromptPart(content=_message)])
             )
         else:
-            message_history.append(
-                ModelResponse(parts=[TextPart(content=_message)])
-            )
-            
-    models.Message(
-        message=message.message,
-        chat_id=chat_id,
-    )
-    
+            message_history.append(ModelResponse(parts=[TextPart(content=_message)]))
+
     db_message = models.Message(
         message=message.message,
         chat_id=chat_id,
@@ -125,7 +121,12 @@ def create_message(
     db.commit()
 
     db_message_bot = models.Message(
-        message=mock_bot_response(message.message, message_history),
+        message=mock_bot_response(
+            message.message,
+            message.model,
+            message.model_provider,
+            message_history,
+        ),
         chat_id=chat_id,
         created_by="bot",
         model=message.model,

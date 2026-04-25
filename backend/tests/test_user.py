@@ -1,6 +1,10 @@
 from app import models
 import time
 
+import pytest
+
+pytestmark = pytest.mark.usefixtures("stub_bot_response")
+
 
 def test_create_user(client):
     response = client.post(
@@ -58,7 +62,11 @@ def test_create_chat(client, db):
 
     response = client.post(
         f"/users/{user_id}/chats",
-        json={"message": "Hello", "model": "test-model"},
+        json={
+            "message": "Hello",
+            "model": "test-model",
+            "model_provider": "groq",
+        },
     )
     assert response.status_code == 200
     data = response.json()
@@ -86,7 +94,11 @@ def test_read_chat(client, db):
 
     response = client.post(
         f"/users/{user_id}/chats",
-        json={"message": "Hello", "model": "test-model"},
+        json={
+            "message": "Hello",
+            "model": "test-model",
+            "model_provider": "groq",
+        },
     )
     chat_id = response.json()["id"]
 
@@ -122,12 +134,20 @@ def test_read_chats(client):
 
     client.post(
         f"/users/{user_id}/chats",
-        json={"message": "Hello1", "model": "test-model-1"},
+        json={
+            "message": "Hello1",
+            "model": "test-model-1",
+            "model_provider": "groq",
+        },
     )
     time.sleep(1.1)  # Ensure different created_at
     client.post(
         f"/users/{user_id}/chats",
-        json={"message": "Hello2", "model": "test-model-2"},
+        json={
+            "message": "Hello2",
+            "model": "test-model-2",
+            "model_provider": "groq",
+        },
     )
 
     response = client.get(f"/users/{user_id}/chats")
@@ -150,6 +170,38 @@ def test_read_chats_with_invalid_user(client):
     assert len(data) == 0
 
 
+def test_read_users_pagination(client):
+    client.post("/users/", json={"name": "A"})
+    client.post("/users/", json={"name": "B"})
+    client.post("/users/", json={"name": "C"})
+    all_users = sorted(client.get("/users/").json(), key=lambda u: u["id"])
+    expected_second = all_users[1]["name"]
+    response = client.get("/users/?skip=1&limit=1")
+    assert response.status_code == 200
+    page = response.json()
+    assert len(page) == 1
+    assert page[0]["name"] == expected_second
+
+
+def test_delete_chat(client, db):
+    user_id = client.post("/users/", json={"name": "U"}).json()["id"]
+    chat_id = client.post(
+        f"/users/{user_id}/chats",
+        json={"message": "Hi", "model": "m", "model_provider": "groq"},
+    ).json()["id"]
+
+    response = client.delete(f"/users/{user_id}/chats/{chat_id}")
+    assert response.status_code == 200
+    assert db.query(models.Chat).filter(models.Chat.id == chat_id).first() is None
+
+
+def test_delete_chat_not_found(client):
+    user_id = client.post("/users/", json={"name": "U"}).json()["id"]
+    response = client.delete(f"/users/{user_id}/chats/99999")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Chat not found for this user"
+
+
 def test_create_message(client, db):
     user_response = client.post(
         "/users/",
@@ -159,13 +211,22 @@ def test_create_message(client, db):
 
     response = client.post(
         f"/users/{user_id}/chats",
-        json={"message": "Hello", "model": "test-model"},
+        json={
+            "message": "Hello",
+            "model": "test-model",
+            "model_provider": "groq",
+        },
     )
     chat_id = response.json()["id"]
 
     response = client.post(
         f"/chats/{chat_id}/messages",
-        json={"message": "Hello Again", "created_by": "user", "model": "test-model"},
+        json={
+            "message": "Hello Again",
+            "created_by": "user",
+            "model": "test-model",
+            "model_provider": "groq",
+        },
     )
     assert response.status_code == 200
     data = response.json()

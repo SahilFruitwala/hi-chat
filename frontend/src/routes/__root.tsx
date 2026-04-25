@@ -10,6 +10,7 @@ import { ModelProvider } from "@/components/model-provider"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { ChatSidebar } from "@/components/chat-sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import NotFound404 from "@/components/not-found"
 
 
 export const Route = createRootRoute({
@@ -33,6 +34,9 @@ export const Route = createRootRoute({
       },
     ],
   }),
+  notFoundComponent: () => {
+    return <NotFound404 />
+  },
   shellComponent: RootDocument,
 })
 

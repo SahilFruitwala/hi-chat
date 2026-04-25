@@ -43,3 +43,18 @@ def client(db):
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def stub_bot_response(monkeypatch):
+    """Avoid real LLM HTTP calls; integration tests expect deterministic echo replies."""
+
+    def stub_mock_bot_response(
+        message: str,
+        model: str,
+        model_provider: str,
+        message_history=None,
+    ):
+        return f"Echo: {message}"
+
+    monkeypatch.setattr("app.crud.mock_bot_response", stub_mock_bot_response)

@@ -1,4 +1,4 @@
-.PHONY: dev backend frontend install help
+.PHONY: dev backend frontend install help ruff ty
 
 # Default target
 .DEFAULT_GOAL := help
@@ -14,7 +14,7 @@ install:
 	@echo "Installing backend dependencies..."
 	cd backend && uv sync
 	@echo "Installing frontend dependencies..."
-	cd frontend && pnpm install
+	cd frontend && bun install
 
 backend:
 	@echo "Starting backend..."
@@ -22,7 +22,7 @@ backend:
 
 frontend:
 	@echo "Starting frontend..."
-	cd frontend && pnpm dev
+	cd frontend && bun dev
 
 dev:
 	@echo "Starting both services in parallel..."
@@ -31,3 +31,12 @@ dev:
 test:
 	@echo "Running backend tests..."
 	cd backend && uv run pytest
+
+
+ruff:
+	@echo "Running ruff..."
+	cd backend && uv run ruff check --fix && uv run ruff format
+
+ty:
+	@echo "Running ty..."
+	cd backend && uv run ty check

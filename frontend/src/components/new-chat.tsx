@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Code2, Globe, PenTool, Sparkles, Zap } from "lucide-react"
 import PromptInputBox from "./prompt-input-box"
 import {
@@ -11,12 +12,12 @@ export function NewChat() {
   const examples = [
     {
       title: "Write & Summarize",
-      description: "Draft a blog post about AI trends in 2024",
+      description: "Write a blog post about AI trends in 2026",
       icon: <PenTool className="size-5 text-blue-500" />,
     },
     {
       title: "Code Assistant",
-      description: "Build a responsive grid layout using CSS Flexbox",
+      description: "How to center a div using CSS Flexbox",
       icon: <Code2 className="size-5 text-emerald-500" />,
     },
     {
@@ -31,6 +32,12 @@ export function NewChat() {
     },
   ]
 
+  const [draftPrompt, setDraftPrompt] = useState<string | undefined>(undefined)
+
+  const handleDraftPromptChange = (prompt: string) => {
+    setDraftPrompt(prompt)
+  }
+
   return (
     <div className="flex h-full flex-col overflow-hidden bg-background">
       <div className="mx-auto no-scrollbar flex w-full max-w-4xl flex-1 flex-col items-center justify-center overflow-y-auto p-6">
@@ -39,7 +46,7 @@ export function NewChat() {
             <Sparkles className="size-8 text-primary" />
           </div>
           <h1 className="mb-3 text-4xl font-bold tracking-tight">
-            Hi, I'm your AI Assistant
+            Hi Boss! I'm your AI Assistant
           </h1>
           <p className="max-w-md text-lg text-muted-foreground">
             How can I help you today? Choose an example below or start typing.
@@ -51,6 +58,7 @@ export function NewChat() {
             <Card
               key={i}
               className="cursor-pointer border-none shadow-none ring-1 ring-sidebar-border transition-all hover:scale-[1.02] hover:bg-muted/50 active:scale-[0.98]"
+              onClick={() => handleDraftPromptChange(example.description)}
             >
               <CardHeader className="flex flex-row items-center gap-4 py-5">
                 <div className="rounded-xl bg-muted p-2.5">{example.icon}</div>
@@ -69,7 +77,7 @@ export function NewChat() {
       </div>
 
       <div className="mx-auto w-full max-w-3xl p-4 md:p-8">
-        <PromptInputBox chatId={null} />
+        <PromptInputBox chatId={null} draftPrompt={draftPrompt} />
         <p className="mt-4 text-center text-xs text-muted-foreground">
           AI can make mistakes. Check important info.
         </p>

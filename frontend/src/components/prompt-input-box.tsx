@@ -1,4 +1,4 @@
-import { CheckIcon, GlobeIcon } from "lucide-react"
+import { CheckIcon } from "lucide-react"
 import { memo, useCallback, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
@@ -36,19 +36,29 @@ const STREAMING_TIMEOUT = 2000
 interface ModelItemProps {
   m: (typeof models)[0]
   selectedModel: string
-  onSelect: (id: string) => void
+  onSelect: ({
+    id,
+    provider,
+  }: {
+    id: string
+    provider: string
+  }) => void
 }
 
 const ModelItem = memo(({ m, selectedModel, onSelect }: ModelItemProps) => {
-  const handleSelect = useCallback(() => onSelect(m.id), [onSelect, m.id])
+  const handleSelect = useCallback(
+    () => onSelect({ id: m.id, provider: m.serviceProvider }),
+    [onSelect, m.id, m.serviceProvider]
+  )
   return (
     <ModelSelectorItem key={m.id} onSelect={handleSelect} value={m.id}>
       <ModelSelectorLogo provider={m.chefSlug} />
       <ModelSelectorName>{m.name}</ModelSelectorName>
       <ModelSelectorLogoGroup>
-        {m.providers.map((provider) => (
-          <ModelSelectorLogo key={provider} provider={provider} />
-        ))}
+        <ModelSelectorLogo
+          key={m.serviceProvider}
+          provider={m.serviceProvider}
+        />
       </ModelSelectorLogoGroup>
       {selectedModel === m.id ? (
         <CheckIcon className="ml-auto size-4" />
@@ -59,10 +69,19 @@ const ModelItem = memo(({ m, selectedModel, onSelect }: ModelItemProps) => {
   )
 })
 
+const modelProviders = [...new Set(models.flatMap((m) => m.chef))]
+
 ModelItem.displayName = "ModelItem"
 
-const PromptInputBox = ({ chatId }: { chatId: string | null }) => {
+const PromptInputBox = ({
+  chatId,
+  draftPrompt,
+}: {
+  chatId: string | null
+  draftPrompt?: string
+}) => {
   const { model, setModel } = useModel()
+  const [provider, setProvider] = useState("")
   const [modelSelectorOpen, setModelSelectorOpen] = useState(false)
   const [status, setStatus] = useState<
     "submitted" | "streaming" | "ready" | "error"
@@ -74,9 +93,17 @@ const PromptInputBox = ({ chatId }: { chatId: string | null }) => {
   const selectedModelData = models.find((m) => m.id === model)
 
   const mutation = useMutation({
-    mutationFn: (message: string) => {
-      if (chatId) {
-        return fetch(`http://localhost:8000/chats/${chatId}/messages`, {
+    mutationFn: async ({
+      message,
+      model: selectedModel,
+      modelProvider,
+    }: {
+      message: string
+      model: string
+      modelProvider: string
+    }) => {
+      const response = chatId
+        ? await fetch(`http://localhost:8000/chats/${chatId}/messages`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -84,24 +111,29 @@ const PromptInputBox = ({ chatId }: { chatId: string | null }) => {
           body: JSON.stringify({
             message,
             created_by: "user",
-            model,
+            model: selectedModel,
+            model_provider: modelProvider,
           }),
         })
-      } else {
-        return fetch(`http://localhost:8000/users/1/chats`, {
+        : await fetch(`http://localhost:8000/users/1/chats`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             message,
-            model,
+            model: selectedModel,
+            model_provider: modelProvider,
           }),
         })
+
+      if (!response.ok) {
+        throw new Error(await response.text())
       }
+
+      return response.json()
     },
-    onSuccess: async (data) => {
-      const json = await data.json()
+    onSuccess: (json) => {
       queryClient.invalidateQueries({ queryKey: ["chats"] })
       if (!chatId) {
         navigate({ to: "/chats/$chatId", params: { chatId: json.id } })
@@ -109,12 +141,19 @@ const PromptInputBox = ({ chatId }: { chatId: string | null }) => {
         queryClient.invalidateQueries({ queryKey: ["messages", chatId] })
       }
     },
+    onError: () => {
+      setStatus("error")
+    },
   })
 
-  const handleModelSelect = useCallback((id: string) => {
-    setModel(id)
-    setModelSelectorOpen(false)
-  }, [])
+  const handleModelSelect = useCallback(
+    ({ id, provider: serviceProvider }: { id: string; provider: string }) => {
+      setModel(id)
+      setProvider(serviceProvider)
+      setModelSelectorOpen(false)
+    },
+    [setModel]
+  )
 
   const handleSubmit = useCallback((message: PromptInputMessage) => {
     const hasText = Boolean(message.text)
@@ -126,9 +165,19 @@ const PromptInputBox = ({ chatId }: { chatId: string | null }) => {
 
     setStatus("submitted")
 
-     
     if (message.text.trim()) {
-      mutation.mutate(message.text)
+      const modelProvider = provider || selectedModelData?.serviceProvider
+
+      if (!modelProvider) {
+        setStatus("error")
+        return
+      }
+
+      mutation.mutate({
+        message: message.text,
+        model,
+        modelProvider,
+      })
     }
 
     setTimeout(() => {
@@ -138,7 +187,7 @@ const PromptInputBox = ({ chatId }: { chatId: string | null }) => {
     setTimeout(() => {
       setStatus("ready")
     }, STREAMING_TIMEOUT)
-  }, [])
+  }, [model, mutation, provider, selectedModelData?.serviceProvider])
 
   return (
     <div>
@@ -146,7 +195,7 @@ const PromptInputBox = ({ chatId }: { chatId: string | null }) => {
         <PromptInput globalDrop multiple onSubmit={handleSubmit}>
           {/* <PromptInputAttachmentsDisplay /> */}
           <PromptInputBody>
-            <PromptInputTextarea />
+            <PromptInputTextarea value={draftPrompt} />
           </PromptInputBody>
           <PromptInputFooter>
             <PromptInputTools>
@@ -157,10 +206,10 @@ const PromptInputBox = ({ chatId }: { chatId: string | null }) => {
                   <PromptInputActionAddScreenshot />
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu> */}
-              <PromptInputButton>
+              {/* <PromptInputButton>
                 <GlobeIcon size={16} />
                 <span>Search</span>
-              </PromptInputButton>
+              </PromptInputButton> */}
               <ModelSelector
                 onOpenChange={setModelSelectorOpen}
                 open={modelSelectorOpen}
@@ -183,7 +232,7 @@ const PromptInputBox = ({ chatId }: { chatId: string | null }) => {
                   <ModelSelectorInput placeholder="Search models..." />
                   <ModelSelectorList>
                     <ModelSelectorEmpty>No models found.</ModelSelectorEmpty>
-                    {["OpenAI", "Anthropic", "Google"].map((chef) => (
+                    {modelProviders.map((chef) => (
                       <ModelSelectorGroup heading={chef} key={chef}>
                         {models
                           .filter((m) => m.chef === chef)

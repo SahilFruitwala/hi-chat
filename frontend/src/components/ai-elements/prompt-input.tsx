@@ -958,11 +958,24 @@ export const PromptInputTextarea = ({
   onKeyDown,
   className,
   placeholder = "What would you like to know?",
+  value: valueFromParent,
   ...props
 }: PromptInputTextareaProps) => {
   const controller = useOptionalPromptInputController();
   const attachments = usePromptInputAttachments();
   const [isComposing, setIsComposing] = useState(false);
+
+  const setInput = controller?.textInput.setInput;
+  useEffect(() => {
+    if (setInput === undefined || valueFromParent === undefined) {
+      return;
+    }
+    setInput(
+      typeof valueFromParent === "string"
+        ? valueFromParent
+        : String(valueFromParent)
+    );
+  }, [valueFromParent, setInput]);
 
   const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = useCallback(
     (e) => {
@@ -1049,9 +1062,14 @@ export const PromptInputTextarea = ({
         },
         value: controller.textInput.value,
       }
-    : {
-        onChange,
-      };
+    : valueFromParent !== undefined
+      ? {
+          onChange,
+          value: valueFromParent,
+        }
+      : {
+          onChange,
+        };
 
   return (
     <InputGroupTextarea

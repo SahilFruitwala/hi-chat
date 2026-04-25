@@ -16,6 +16,8 @@ wheels/
 .ruff_cache
 
 .coverage
+coverage.xml
+htmlcov/
 
 .pytest_cache
 
@@ -33,3 +35,5 @@ count.txt
 .vinxi
 __unconfig*
 todos.json
+
+.uv-cache
